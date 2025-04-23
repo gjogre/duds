@@ -1,6 +1,8 @@
-use bevy::{core_pipeline::bloom::Bloom, prelude::*};
-
+use bevy::prelude::*;
 mod asset_manager;
+mod components;
+mod entities;
+mod map;
 use asset_manager::{AssetManager, setup_asset_manager};
 
 fn main() {
