@@ -3,6 +3,7 @@ mod asset_manager;
 mod components;
 mod entities;
 mod map;
+mod systems;
 use asset_manager::{AssetManager, setup_asset_manager};
 
 fn main() {
@@ -12,15 +13,17 @@ fn main() {
             Startup,
             (setup_asset_manager, spawn_example_sprite, spawn_camera).chain(),
         )
+        .add_systems(Update, systems::map_render::MapRender::attach_sprites)
         .run();
 }
 
 fn spawn_example_sprite(mut commands: Commands, asset_manager: Res<AssetManager>) {
-    if let Some(sprite) = asset_manager.get_sprite(asset_manager::TileSheetType::Monsters, 2, 1) {
-        commands.spawn((sprite, Transform::from_xyz(0.0, 0.0, 1.0)));
+    if let Some(sprite) = asset_manager.get_sprite(&asset_manager::TileSheetType::Monsters, 2, 1) {
+        commands.spawn((sprite, Transform::from_xyz(128.0, 128.0, 1.0)));
     } else {
         println!("Warning: Could not get sprite from asset manager");
     }
+    map::map::generate_test_map(commands);
 }
 fn spawn_camera(mut commands: Commands) {
     commands.spawn((
@@ -34,6 +37,6 @@ fn spawn_camera(mut commands: Commands) {
             scale: 1.,
             ..OrthographicProjection::default_2d()
         }),
-        Transform::from_xyz(0.0, 0.0, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
+        Transform::from_xyz(256.0, 240.0, 5.0),
     ));
 }

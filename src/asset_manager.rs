@@ -19,12 +19,12 @@ pub struct AssetManager {
 }
 
 impl AssetManager {
-    pub fn get_sprite(&self, sheet_type: TileSheetType, x: u32, y: u32) -> Option<Sprite> {
+    pub fn get_sprite(&self, sheet_type: &TileSheetType, x: u32, y: u32) -> Option<Sprite> {
         let (image, layout, columns) = self.sheets.get(match sheet_type {
             TileSheetType::World => "world",
             TileSheetType::Monsters => "monsters",
         })?;
-        let index = y * *columns + x;
+        let index = x * *columns + y;
         let texture_atlas = TextureAtlas {
             index: index as usize,
             layout: layout.clone(),
@@ -67,7 +67,7 @@ pub fn setup_asset_manager(
             sheet.columns,
             sheet.rows,
             None,
-            None,
+            Some(UVec2::new(1, 0)),
         );
 
         let layout_handle = atlas_layouts.add(layout);
