@@ -1,1 +1,2 @@
-pub mod map_render;
+pub mod game_input;
+pub mod map;

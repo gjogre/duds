@@ -5,15 +5,28 @@ mod entities;
 mod map;
 mod systems;
 use asset_manager::{AssetManager, setup_asset_manager};
+use systems::game_input::CursorState;
 
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
+        .insert_resource(CursorState {
+            world: Vec2::ZERO,
+            screen: Vec2::ZERO,
+        })
         .add_systems(
             Startup,
             (setup_asset_manager, spawn_example_sprite, spawn_camera).chain(),
         )
-        .add_systems(Update, systems::map_render::MapRender::attach_sprites)
+        .add_systems(
+            Update,
+            (
+                systems::map::Map::attach_sprites,
+                systems::game_input::cursor_moved,
+                systems::game_input::cursor_events,
+                systems::map::Map::highlight_sprite,
+            ),
+        )
         .run();
 }
 
