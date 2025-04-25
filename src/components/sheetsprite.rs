@@ -1,4 +1,4 @@
-use crate::asset_manager::{AssetManager, TileSheetType};
+use crate::asset_manager::TileSheetType;
 use bevy::prelude::*;
 
 #[derive(Component)]

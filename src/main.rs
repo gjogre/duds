@@ -2,7 +2,6 @@ use bevy::prelude::*;
 mod asset_manager;
 mod components;
 mod entities;
-mod map;
 mod systems;
 use asset_manager::{AssetManager, setup_asset_manager};
 use systems::game_input::CursorState;
@@ -25,6 +24,7 @@ fn main() {
                 systems::game_input::cursor_moved,
                 systems::game_input::cursor_events,
                 systems::map::Map::highlight_sprite,
+                systems::map::Map::unhighlight_sprite,
             ),
         )
         .run();
@@ -36,7 +36,7 @@ fn spawn_example_sprite(mut commands: Commands, asset_manager: Res<AssetManager>
     } else {
         println!("Warning: Could not get sprite from asset manager");
     }
-    map::map::generate_test_map(commands);
+    systems::map::Map::generate_test_map(commands);
 }
 fn spawn_camera(mut commands: Commands) {
     commands.spawn((
