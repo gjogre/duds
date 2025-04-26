@@ -1,10 +1,11 @@
 use crate::{
     asset_manager::{AssetManager, TileSheetType},
     components::{
-        highlight::Highlighted, map_position::MapPosition, sheetsprite::SheetSprite,
+        highlight::Highlight, map_position::MapPosition, sheetsprite::SheetSprite,
         visible::Visible, walkable::Walkable,
     },
     entities::FloorTileBundle,
+    events::HighlightEvent,
 };
 use bevy::prelude::*;
 use rand::Rng;
@@ -58,7 +59,8 @@ impl Map {
     pub fn highlight_sprite(
         cursor_state: Res<CursorState>,
         mut commands: Commands,
-        mut query: Query<(Entity, &mut Sprite, &Transform), Without<Highlighted>>,
+        mut ev_highlight_changed: EventWriter<HighlightEvent>,
+        mut query: Query<(Entity, &mut Sprite, &Transform), Without<Highlight>>,
     ) {
         for (entity, mut sprite, transform) in query.iter_mut() {
             if is_inside(
@@ -69,26 +71,23 @@ impl Map {
                 16.0,
             ) {
                 sprite.color.set_alpha(0.5);
-                commands.entity(entity).insert(Highlighted);
+                commands.entity(entity).insert(Highlight);
+                ev_highlight_changed.send(HighlightEvent(entity));
             }
         }
     }
 
     pub fn unhighlight_sprite(
-        cursor_state: Res<CursorState>,
         mut commands: Commands,
-        mut query: Query<(Entity, &mut Sprite, &Transform), With<Highlighted>>,
+        mut ev_highlight_changed: EventReader<HighlightEvent>,
+        mut query: Query<(Entity, &mut Sprite), With<Highlight>>,
     ) {
-        for (entity, mut sprite, transform) in query.iter_mut() {
-            if !is_inside(
-                transform.translation.x,
-                transform.translation.y,
-                cursor_state.world.x,
-                cursor_state.world.y,
-                TILE_SIZE as f32,
-            ) {
-                sprite.color.set_alpha(1.0);
-                commands.entity(entity).remove::<Highlighted>();
+        if let Some(last_entity) = ev_highlight_changed.read().last() {
+            for (entity, mut sprite) in query.iter_mut() {
+                if entity != last_entity.0 {
+                    sprite.color.set_alpha(1.0);
+                    commands.entity(entity).remove::<Highlight>();
+                }
             }
         }
     }
@@ -114,6 +113,12 @@ impl Map {
                     Visible,
                 ));
             }
+        }
+    }
+
+    pub fn pathfind_to_highlight(query: Query<(&MapPosition), With<Highlight>>) {
+        for (map_position) in query.iter() {
+            // Implement pathfinding logic here
         }
     }
 }

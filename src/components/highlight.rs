@@ -1,4 +1,7 @@
 use bevy::prelude::*;
 
 #[derive(Component)]
-pub struct Highlighted;
+pub struct Highlight;
+
+#[derive(Component)]
+pub struct PathfindingHighlight;
