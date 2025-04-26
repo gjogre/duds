@@ -6,7 +6,6 @@ mod events;
 mod systems;
 use asset_manager::{AssetManager, setup_asset_manager};
 
-use events::HighlightEvent;
 use systems::game_input::CursorState;
 
 fn main() {
@@ -16,7 +15,6 @@ fn main() {
             world: Vec2::ZERO,
             screen: Vec2::ZERO,
         })
-        .add_event::<HighlightEvent>()
         .add_systems(
             Startup,
             (setup_asset_manager, spawn_example_sprite, spawn_camera).chain(),
@@ -28,7 +26,6 @@ fn main() {
                 systems::game_input::cursor_moved,
                 systems::game_input::cursor_events,
                 systems::map::Map::highlight_sprite,
-                systems::map::Map::unhighlight_sprite,
             ),
         )
         .run();

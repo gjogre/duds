@@ -5,7 +5,6 @@ use crate::{
         visible::Visible, walkable::Walkable,
     },
     entities::FloorTileBundle,
-    events::HighlightEvent,
 };
 use bevy::prelude::*;
 use rand::Rng;
@@ -59,35 +58,26 @@ impl Map {
     pub fn highlight_sprite(
         cursor_state: Res<CursorState>,
         mut commands: Commands,
-        mut ev_highlight_changed: EventWriter<HighlightEvent>,
-        mut query: Query<(Entity, &mut Sprite, &Transform), Without<Highlight>>,
+        mut query: Query<(Entity, &mut Sprite, &Transform, Option<&Highlight>)>,
     ) {
-        for (entity, mut sprite, transform) in query.iter_mut() {
-            if is_inside(
+        for (entity, mut sprite, transform, highlight) in query.iter_mut() {
+            let hovered = is_inside(
                 transform.translation.x,
                 transform.translation.y,
                 cursor_state.world.x,
                 cursor_state.world.y,
                 16.0,
-            ) {
-                sprite.color.set_alpha(0.5);
-                commands.entity(entity).insert(Highlight);
-                ev_highlight_changed.send(HighlightEvent(entity));
-            }
-        }
-    }
-
-    pub fn unhighlight_sprite(
-        mut commands: Commands,
-        mut ev_highlight_changed: EventReader<HighlightEvent>,
-        mut query: Query<(Entity, &mut Sprite), With<Highlight>>,
-    ) {
-        if let Some(last_entity) = ev_highlight_changed.read().last() {
-            for (entity, mut sprite) in query.iter_mut() {
-                if entity != last_entity.0 {
+            );
+            match (hovered, highlight) {
+                (true, None) => {
+                    sprite.color.set_alpha(0.5);
+                    commands.entity(entity).insert(Highlight);
+                }
+                (false, Some(_)) => {
                     sprite.color.set_alpha(1.0);
                     commands.entity(entity).remove::<Highlight>();
                 }
+                _ => {}
             }
         }
     }
