@@ -4,6 +4,7 @@ mod components;
 mod entities;
 mod systems;
 use asset_manager::{AssetManager, setup_asset_manager};
+
 use systems::game_input::CursorState;
 
 fn main() {

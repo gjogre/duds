@@ -4,7 +4,8 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-bevy = "0.16.0-rc.5"
+bevy = "0.16.0"
+rand = "0.9.1"
 
 [profile.dev]
 opt-level = 1

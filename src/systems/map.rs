@@ -1,13 +1,13 @@
 use crate::{
-    asset_manager::AssetManager,
+    asset_manager::{AssetManager, TileSheetType},
     components::{
         highlight::Highlighted, map_position::MapPosition, sheetsprite::SheetSprite,
-        visible::Visible,
+        visible::Visible, walkable::Walkable,
     },
     entities::FloorTileBundle,
 };
-
 use bevy::prelude::*;
+use rand::Rng;
 
 use super::game_input::CursorState;
 pub struct Map;
@@ -66,7 +66,7 @@ impl Map {
                 transform.translation.y,
                 cursor_state.world.x,
                 cursor_state.world.y,
-                8.0,
+                16.0,
             ) {
                 sprite.color.set_alpha(0.5);
                 commands.entity(entity).insert(Highlighted);
@@ -98,12 +98,18 @@ impl Map {
             width: 32,
             height: 31,
         };
+        let mut rng = rand::rng();
         for x in 0..map.width {
             for y in 0..map.height {
                 commands.spawn((
                     FloorTileBundle {
                         map_position: MapPosition { x, y },
-                        ..default()
+                        sheetsprite: SheetSprite {
+                            tilesheet: TileSheetType::World,
+                            tilesheet_x: 5,
+                            tilesheet_y: rng.random_range(8..12),
+                        },
+                        walkable: Walkable,
                     },
                     Visible,
                 ));
