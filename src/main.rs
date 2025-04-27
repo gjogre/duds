@@ -32,11 +32,17 @@ fn main() {
 }
 
 fn spawn_example_sprite(mut commands: Commands, asset_manager: Res<AssetManager>) {
-    if let Some(sprite) = asset_manager.get_sprite(&asset_manager::TileSheetType::Monsters, 2, 1) {
-        commands.spawn((sprite, Transform::from_xyz(128.0, 128.0, 1.0)));
-    } else {
-        println!("Warning: Could not get sprite from asset manager");
-    }
+    commands.spawn((
+        components::player::Player,
+        components::sheetsprite::SheetSprite {
+            tilesheet: asset_manager::TileSheetType::Monsters,
+            tilesheet_x: 2,
+            tilesheet_y: 1,
+        },
+        components::map_position::MapPosition { x: 10, y: 10 },
+        components::layer::Layer(1),
+    ));
+
     systems::map::Map::generate_test_map(commands);
 }
 fn spawn_camera(mut commands: Commands) {

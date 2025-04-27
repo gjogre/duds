@@ -1,7 +1,9 @@
 pub mod collision;
 pub mod health;
 pub mod highlight;
+pub mod layer;
 pub mod map_position;
+pub mod player;
 pub mod sheetsprite;
 pub mod visible;
 pub mod walkable;

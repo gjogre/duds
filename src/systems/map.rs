@@ -1,7 +1,7 @@
 use crate::{
     asset_manager::{AssetManager, TileSheetType},
     components::{
-        highlight::Highlight, map_position::MapPosition, sheetsprite::SheetSprite,
+        highlight::Highlight, layer::Layer, map_position::MapPosition, sheetsprite::SheetSprite,
         visible::Visible, walkable::Walkable,
     },
     entities::FloorTileBundle,
@@ -36,9 +36,9 @@ impl Map {
     pub fn attach_sprites(
         mut commands: Commands,
         asset_manager: Res<AssetManager>,
-        query: Query<(Entity, &SheetSprite, &MapPosition), Without<Sprite>>,
+        query: Query<(Entity, &SheetSprite, &MapPosition, Option<&Layer>), Without<Sprite>>,
     ) {
-        for (entity, sheet_sprite, map_position) in query.iter() {
+        for (entity, sheet_sprite, map_position, layer) in query.iter() {
             if let Some(sprite) = asset_manager.get_sprite(
                 &sheet_sprite.tilesheet,
                 sheet_sprite.tilesheet_x,
@@ -46,9 +46,14 @@ impl Map {
             ) {
                 let (x, y) = map_to_world_coordinates(map_position);
                 //println!("Creating Sprite coordinates: ({}, {})", x, y);
-                commands
-                    .entity(entity)
-                    .insert((sprite, Transform::from_xyz(x as f32, y as f32, 0.0)));
+                commands.entity(entity).insert((
+                    sprite,
+                    Transform::from_xyz(
+                        x as f32,
+                        y as f32,
+                        layer.map(|l| l.0 as f32).unwrap_or(0.0),
+                    ),
+                ));
             } else {
                 warn!("Failed to get sprite for entity {:?}", entity);
             }
@@ -98,7 +103,7 @@ impl Map {
                             tilesheet_x: 5,
                             tilesheet_y: rng.random_range(8..12),
                         },
-                        walkable: Walkable,
+                        walkable: Walkable { cost: 1 },
                     },
                     Visible,
                 ));
@@ -108,7 +113,7 @@ impl Map {
 
     pub fn pathfind_to_highlight(query: Query<(&MapPosition), With<Highlight>>) {
         for (map_position) in query.iter() {
-            // Implement pathfinding logic here
+            // TODO
         }
     }
 }
