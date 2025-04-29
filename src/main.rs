@@ -4,8 +4,9 @@ mod components;
 mod entities;
 mod events;
 mod systems;
-use asset_manager::{AssetManager, setup_asset_manager};
+use asset_manager::{attach_sprites, setup_asset_manager};
 
+use events::HighlightEvent;
 use systems::game_input::CursorState;
 
 fn main() {
@@ -15,6 +16,7 @@ fn main() {
             world: Vec2::ZERO,
             screen: Vec2::ZERO,
         })
+        .add_event::<HighlightEvent>()
         .add_systems(
             Startup,
             (setup_asset_manager, spawn_example_sprite, spawn_camera).chain(),
@@ -22,28 +24,35 @@ fn main() {
         .add_systems(
             Update,
             (
-                systems::map::Map::attach_sprites,
+                attach_sprites,
                 systems::game_input::cursor_moved,
                 systems::game_input::cursor_events,
-                systems::map::Map::highlight_sprite,
+                systems::map::highlight_mouse_hover,
+                systems::map::highlight_changed,
+                systems::map::visualize_target_path,
+                systems::pathfinding::find_path,
             ),
         )
         .run();
 }
 
-fn spawn_example_sprite(mut commands: Commands, asset_manager: Res<AssetManager>) {
+fn spawn_example_sprite(mut commands: Commands) {
     commands.spawn((
         components::player::Player,
+        components::target::Target {
+            path: None,
+            position: None,
+        },
         components::sheetsprite::SheetSprite {
             tilesheet: asset_manager::TileSheetType::Monsters,
             tilesheet_x: 2,
             tilesheet_y: 1,
         },
         components::map_position::MapPosition { x: 10, y: 10 },
-        components::layer::Layer(1),
+        components::layer::Layer(2),
     ));
 
-    systems::map::Map::generate_test_map(commands);
+    systems::map::generate_test_map(commands);
 }
 fn spawn_camera(mut commands: Commands) {
     commands.spawn((

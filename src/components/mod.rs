@@ -1,9 +1,12 @@
+pub mod blocking;
 pub mod collision;
 pub mod health;
 pub mod highlight;
 pub mod layer;
 pub mod map_position;
+pub mod path_marker;
 pub mod player;
 pub mod sheetsprite;
+pub mod target;
 pub mod visible;
 pub mod walkable;

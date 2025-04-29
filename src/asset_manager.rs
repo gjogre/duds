@@ -1,6 +1,11 @@
 use bevy::prelude::*;
 use std::collections::HashMap;
 
+use crate::{
+    components::{layer::Layer, map_position::MapPosition, sheetsprite::SheetSprite},
+    systems::map::map_to_world_coordinates,
+};
+
 pub struct TilesheetInfo {
     pub name: String,
     pub path: String,
@@ -13,6 +18,28 @@ pub enum TileSheetType {
     Monsters,
 }
 
+pub fn attach_sprites(
+    mut commands: Commands,
+    asset_manager: Res<AssetManager>,
+    query: Query<(Entity, &SheetSprite, &MapPosition, Option<&Layer>), Without<Sprite>>,
+) {
+    for (entity, sheet_sprite, map_position, layer) in query.iter() {
+        if let Some(sprite) = asset_manager.get_sprite(
+            &sheet_sprite.tilesheet,
+            sheet_sprite.tilesheet_x,
+            sheet_sprite.tilesheet_y,
+        ) {
+            let (x, y) = map_to_world_coordinates(map_position);
+            println!("Creating Sprite coordinates: ({}, {})", x, y);
+            commands.entity(entity).insert((
+                sprite,
+                Transform::from_xyz(x as f32, y as f32, layer.map(|l| l.0 as f32).unwrap_or(0.0)),
+            ));
+        } else {
+            warn!("Failed to get sprite for entity {:?}", entity);
+        }
+    }
+}
 #[derive(Resource)]
 pub struct AssetManager {
     sheets: HashMap<String, (Handle<Image>, Handle<TextureAtlasLayout>, u32)>, // u32 = columns
