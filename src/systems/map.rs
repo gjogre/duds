@@ -5,7 +5,7 @@ use crate::{
         player::Player, sheetsprite::SheetSprite, target::Target, visible::Visible,
         walkable::Walkable,
     },
-    entities::FloorTileBundle,
+    entities::{FloorTileBundle, WallTileBundle},
     events::HighlightEvent,
 };
 use bevy::prelude::*;
@@ -138,6 +138,15 @@ pub fn generate_test_map(mut commands: Commands) {
                 },
                 Visible,
             ));
+            if rng.random_range(0..10) > 8 {
+                commands.spawn((
+                    WallTileBundle {
+                        map_position: MapPosition { x, y },
+                        ..default()
+                    },
+                    Visible,
+                ));
+            }
         }
     }
 }
