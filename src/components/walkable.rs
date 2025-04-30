@@ -1,6 +1,0 @@
-use bevy::prelude::*;
-
-#[derive(Component, Default)]
-pub struct Walkable {
-    pub cost: u32,
-}

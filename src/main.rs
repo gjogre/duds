@@ -4,15 +4,27 @@ mod components;
 mod entities;
 mod events;
 mod systems;
-use asset_manager::{attach_sprites, setup_asset_manager};
-
+use asset_manager::{attach_sprites, setup_asset_manager, sync_transform_to_map_position};
 use events::HighlightEvent;
-use systems::game_input::CursorState;
+use systems::{
+    game_input::cursor::*,
+    pathfinding::*,
+    tile_map::{generation::*, highlight::*, visualization::*},
+};
 
 fn main() {
     App::new()
-        .add_plugins(DefaultPlugins)
-        .insert_resource(CursorState {
+        .add_plugins(DefaultPlugins.set(WindowPlugin {
+            primary_window: Some(Window {
+                title: "Duds".into(),
+                resolution: (1280., 720.).into(),
+                ..default()
+            }),
+            exit_condition: bevy::window::ExitCondition::OnPrimaryClosed,
+            close_when_requested: true,
+            ..default()
+        }))
+        .insert_resource(CursorPosition {
             world: Vec2::ZERO,
             screen: Vec2::ZERO,
         })
@@ -25,12 +37,15 @@ fn main() {
             Update,
             (
                 attach_sprites,
-                systems::game_input::cursor_moved,
-                systems::game_input::cursor_events,
-                systems::map::highlight_mouse_hover,
-                systems::map::highlight_changed,
-                systems::map::visualize_target_path,
-                systems::pathfinding::find_path,
+                cursor_moved,
+                cursor_events,
+                cursor_clicked,
+                highlight_mouse_hover,
+                highlight_changed,
+                visualize_target_path,
+                find_path,
+                sync_transform_to_map_position,
+                move_along_path,
             ),
         )
         .run();
@@ -38,21 +53,21 @@ fn main() {
 
 fn spawn_example_sprite(mut commands: Commands) {
     commands.spawn((
-        components::player::Player,
-        components::target::Target {
+        components::basic::Player,
+        components::tiles::Target {
             path: None,
             position: None,
         },
-        components::sheetsprite::SheetSprite {
+        components::tiles::SheetSprite {
             tilesheet: asset_manager::TileSheetType::Monsters,
             tilesheet_x: 2,
             tilesheet_y: 1,
         },
-        components::map_position::MapPosition { x: 10, y: 10 },
-        components::layer::Layer(2),
+        components::tiles::MapPosition { x: 10, y: 10 },
+        components::tiles::Layer(2),
     ));
 
-    systems::map::generate_test_map(commands);
+    generate_test_map(commands);
 }
 fn spawn_camera(mut commands: Commands) {
     commands.spawn((

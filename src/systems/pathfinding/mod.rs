@@ -1,7 +1,5 @@
-use crate::components::blocking::Blocking;
-use crate::components::map_position::MapPosition;
-use crate::components::target::Target;
-use crate::components::walkable::Walkable;
+use crate::components::attributes::Moving;
+use crate::components::tiles::*;
 use bevy::prelude::*;
 use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashMap};
@@ -56,7 +54,7 @@ fn build_tile_lookup(
 }
 
 pub fn find_path(
-    mut target_query: Query<(&MapPosition, &mut Target)>,
+    mut target_query: Query<(&MapPosition, &mut Target), Without<Moving>>,
     tiles: Query<(&MapPosition, Option<&Walkable>, Option<&Blocking>)>,
 ) {
     let tile_lookup = build_tile_lookup(&tiles);
@@ -167,5 +165,26 @@ fn get_walkable_cost(
         Some((true, _)) => None, // Blocked
         Some((false, Some(cost))) => Some(*cost),
         _ => None,
+    }
+}
+
+pub fn move_along_path(
+    time: Res<Time>,
+    mut query: Query<(&mut MapPosition, &mut Target, &mut Moving)>,
+) {
+    for (mut map_pos, mut target, mut moving) in query.iter_mut() {
+        moving.timer.tick(time.delta());
+
+        if moving.timer.finished() {
+            if let Some(path) = target.path.as_mut() {
+                if path.len() > 1 {
+                    path.remove(0); // drop current
+                    *map_pos = path[0];
+                    moving.timer = Timer::from_seconds(1.0 / moving.speed, TimerMode::Once);
+                } else {
+                    target.path = None;
+                }
+            }
+        }
     }
 }

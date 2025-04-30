@@ -1,10 +1,9 @@
+use crate::{
+    components::{attributes::Moving, tiles::*},
+    systems::tile_map::util::{TILE_SIZE, map_to_world_coordinates},
+};
 use bevy::prelude::*;
 use std::collections::HashMap;
-
-use crate::{
-    components::{layer::Layer, map_position::MapPosition, sheetsprite::SheetSprite},
-    systems::map::map_to_world_coordinates,
-};
 
 pub struct TilesheetInfo {
     pub name: String,
@@ -30,7 +29,7 @@ pub fn attach_sprites(
             sheet_sprite.tilesheet_y,
         ) {
             let (x, y) = map_to_world_coordinates(map_position);
-            println!("Creating Sprite coordinates: ({}, {})", x, y);
+            // println!("Creating Sprite coordinates: ({}, {})", x, y);
             commands.entity(entity).insert((
                 sprite,
                 Transform::from_xyz(x as f32, y as f32, layer.map(|l| l.0 as f32).unwrap_or(0.0)),
@@ -38,6 +37,28 @@ pub fn attach_sprites(
         } else {
             warn!("Failed to get sprite for entity {:?}", entity);
         }
+    }
+}
+
+pub fn sync_transform_to_map_position(
+    time: Res<Time>,
+    mut query: Query<(&MapPosition, &mut Transform, Option<&Moving>)>,
+) {
+    for (map_pos, mut transform, maybe_moving) in query.iter_mut() {
+        let (x, y) = map_to_world_coordinates(map_pos);
+        let target_pos = Vec3::new(x as f32, y as f32, transform.translation.z);
+
+        let diff = target_pos - transform.translation;
+
+        if diff.length_squared() < 0.01 {
+            transform.translation = target_pos;
+            continue;
+        }
+
+        let speed = maybe_moving
+            .map(|m| m.speed * TILE_SIZE as f32)
+            .unwrap_or(100.0);
+        transform.translation += diff.normalize() * speed * time.delta_secs();
     }
 }
 #[derive(Resource)]

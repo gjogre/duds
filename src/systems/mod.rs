@@ -1,3 +1,3 @@
 pub mod game_input;
-pub mod map;
 pub mod pathfinding;
+pub mod tile_map;

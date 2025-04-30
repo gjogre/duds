@@ -1,10 +1,5 @@
-use crate::{
-    asset_manager::TileSheetType,
-    components::{
-        blocking::Blocking, collision::Collision, map_position::MapPosition,
-        sheetsprite::SheetSprite, walkable::Walkable,
-    },
-};
+use crate::asset_manager::TileSheetType;
+use crate::components::tiles::*;
 use bevy::prelude::*;
 
 #[derive(Bundle)]
@@ -30,7 +25,6 @@ impl Default for FloorTileBundle {
 
 #[derive(Bundle)]
 pub struct WallTileBundle {
-    pub collision: Collision,
     pub blocking: Blocking,
     pub sheetsprite: SheetSprite,
     pub map_position: MapPosition,
@@ -39,7 +33,6 @@ pub struct WallTileBundle {
 impl Default for WallTileBundle {
     fn default() -> Self {
         WallTileBundle {
-            collision: Collision::default(),
             sheetsprite: SheetSprite {
                 tilesheet: TileSheetType::World,
                 tilesheet_x: 16,
