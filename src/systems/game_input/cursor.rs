@@ -18,6 +18,7 @@ pub fn cursor_events(
             .map(|ray| ray.origin.truncate())
         {
             cursor_state.world = local_world_position;
+            //info!("Cursor moved to {:?}", cursor_state.world);
         }
     } else {
         println!("No camera or multiple cameras found");

@@ -28,6 +28,7 @@ pub struct WallTileBundle {
     pub blocking: Blocking,
     pub sheetsprite: SheetSprite,
     pub map_position: MapPosition,
+    pub layer: Layer,
 }
 
 impl Default for WallTileBundle {
@@ -39,6 +40,7 @@ impl Default for WallTileBundle {
                 tilesheet_y: 6,
             },
             blocking: Blocking,
+            layer: Layer(1),
             map_position: MapPosition::default(),
         }
     }

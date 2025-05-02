@@ -21,7 +21,7 @@ pub fn visualize_target_path(
                 let (x, y) = map_to_world_coordinates(map_pos);
                 commands.spawn((
                     Sprite {
-                        color: Color::srgba(0.2, 0.8, 1.0, 0.3),
+                        color: Color::srgba(0.4, 0.4, 0.4, 0.1),
                         custom_size: Some(Vec2::splat(16.0)),
                         ..default()
                     },
