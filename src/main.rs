@@ -14,7 +14,7 @@ use game_ui::gameui::{button_system, setup_game_ui};
 use systems::{
     game_input::cursor::*,
     pathfinding::*,
-    tile_map::{generation::*, highlight::*, visualization::*},
+    tile_map::{generation::*, highlight::*},
 };
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Default, States)]
@@ -26,20 +26,19 @@ pub enum AppState {
 
 fn main() {
     App::new()
-        .add_plugins((DefaultPlugins.set(WindowPlugin {
-            primary_window: Some(Window {
-                title: "Duds".into(),
-                resolution: (1280., 720.).into(),
+        .add_plugins((
+            DefaultPlugins.set(WindowPlugin {
+                primary_window: Some(Window {
+                    title: "Duds".into(),
+                    resolution: (1280., 720.).into(),
+                    ..default()
+                }),
+                exit_condition: bevy::window::ExitCondition::OnPrimaryClosed,
+                close_when_requested: true,
                 ..default()
             }),
-            exit_condition: bevy::window::ExitCondition::OnPrimaryClosed,
-            close_when_requested: true,
-            ..default()
-        }),))
-        .insert_resource(CursorPosition {
-            world: Vec2::ZERO,
-            screen: Vec2::ZERO,
-        })
+            MeshPickingPlugin,
+        ))
         .add_event::<HighlightEvent>()
         .insert_state::<AppState>(AppState::AssetLoading)
         .add_systems(
@@ -51,12 +50,9 @@ fn main() {
             (
                 slice_tilesheets_into_cache.run_if(in_state(AppState::AssetLoading)),
                 attach_sprites.run_if(in_state(AppState::Game)),
-                cursor_moved,
-                cursor_events,
                 cursor_clicked,
-                highlight_mouse_hover,
                 highlight_changed,
-                visualize_target_path,
+                highlight_target_path,
                 find_path,
                 button_system,
             ),
@@ -93,7 +89,16 @@ fn test_stuff(mut commands: Commands) {
         brightness: 0.1,
         ..default()
     });
-
+    commands.spawn((
+        PointLight {
+            shadows_enabled: true,
+            intensity: 10_000_000.,
+            range: 100.0,
+            shadow_depth_bias: 0.2,
+            ..default()
+        },
+        Transform::from_xyz(16.0, 16.0, 20.0),
+    ));
     generate_test_map(commands);
 }
 fn spawn_camera(mut commands: Commands) {

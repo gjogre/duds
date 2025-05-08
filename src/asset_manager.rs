@@ -47,7 +47,6 @@ pub fn attach_sprites(
 
             let material = materials.add(StandardMaterial {
                 base_color_texture: Some(image_handle.clone()),
-                unlit: true,
                 ..Default::default()
             });
 
